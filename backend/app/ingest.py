@@ -1,6 +1,8 @@
 from pypdf import PdfReader
 from datetime import datetime
 from app.database import get_connection
+import os
+from app.vector_store import embed_document
 
 def read_pdf(path):
     reader = PdfReader(path)
@@ -34,12 +36,34 @@ def save_document(filename, chunks):
     conn.close()
     return doc_id
 
-if __name__ == "__main__":
-     text = read_pdf("../sample_docs/Meridian_Works_Employee_Policy_Handbook.pdf")
-     chunks = chunk_text(text)
+def already_saved(filename):
+    conn = get_connection()
+    row = conn.execute("SELECT id FROM documents WHERE filename = ?", (filename,)).fetchone()
+    conn.close()
+    return row is not None
+
+def ingest_file(path):
+    filename = os.path.basename(path)
+    if already_saved(filename):
+        return None
+
+    text = read_pdf(path)
+    chunks = chunk_text(text)
+    doc_id = save_document(filename, chunks)
+    embed_document(doc_id)
+    return doc_id         
+
+
+# if __name__ == "__main__":
+#      text = read_pdf("../sample_docs/Meridian_Works_Employee_Policy_Handbook.pdf")
+#      chunks = chunk_text(text)
     #  print("Length of chunks :", len(chunks))
     #  print(chunks[0])
     #  print("-------")
     #  print(chunks[1]) 
-     doc_id = save_document("Meridian_Works_Employee_Policy_Handbook.pdf", chunks)
-     print("saved_document", doc_id, "with", len(chunks), "chunks")
+    #  doc_id = save_document("Meridian_Works_Employee_Policy_Handbook.pdf", chunks)
+    #  print("saved_document", doc_id, "with", len(chunks), "chunks")
+
+if __name__ == "__main__":
+    doc_id = ingest_file("../sample_docs/Meridian_Works_Employee_Policy_Handbook.pdf")
+    print("doc id:", doc_id)

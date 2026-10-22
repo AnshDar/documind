@@ -39,3 +39,9 @@ def init_db():
 
     conn.commit()
     conn.close()
+
+def get_filename(doc_id):
+    conn = get_connection()
+    row = conn.execute("SELECT filename FROM documents WHERE id = ?", (doc_id,)).fetchone()
+    conn.close()
+    return row["filename"]
