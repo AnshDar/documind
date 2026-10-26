@@ -5,3 +5,5 @@ sentence-transformers
 python-multipart
 pytest
 pypdf
+groq
+python-dotenv
