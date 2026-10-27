@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 DB_PATH = "documind.db"
 
 def get_connection():
@@ -45,3 +46,9 @@ def get_filename(doc_id):
     row = conn.execute("SELECT filename FROM documents WHERE id = ?", (doc_id,)).fetchone()
     conn.close()
     return row["filename"]
+
+def save_query(question, answer):
+    conn = get_connection()
+    conn.execute("INSERT INTO queries (question, answer, created_at) VALUES (?, ?, ?)", (question, answer, datetime.now().isoformat()))
+    conn.commit()
+    conn.close()
