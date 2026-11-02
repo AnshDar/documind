@@ -5,8 +5,15 @@ from app.database import init_db, get_filename, save_query
 from app.ingest import ingest_file
 from app.vector_store import search
 from app.rag import answer_question
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 init_db()
 
 UPLOAD_DIR = "uploads"
