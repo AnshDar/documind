@@ -10,7 +10,8 @@ MODEL = "openai/gpt-oss-120b"
 def ask_llm(question, chunks):
     context = "\n\n".join(chunks)
     prompt = ("Answer the question using only the text below. "
-              "If the answer is not in the text, say you could not find it.\n\n"
+              "If the answer is not in the text, say you could not find it. "
+              "Reply in plain text, without bold, bullet symbols or other formatting.\n\n"
               "Text:\n" + context + "\n\nQuestion: " + question)
     response = client.chat.completions.create(
         model = MODEL,

@@ -9,6 +9,7 @@ function App() {
   const [question, setQuestion] = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   async function handleUpload() {
     if (!file) {
@@ -19,67 +20,89 @@ function App() {
     formData.append('file', file)
 
     setMessage('Uploading...')
-    const response = await fetch(API + '/upload', {
-      method: 'POST',
-      body: formData
-    })
-    const data = await response.json()
-
-    if (response.ok) {
-      setMessage(data.message + ': ' + data.filename)
-    } else {
-      setMessage(data.detail)
+    try {
+      const response = await fetch(API + '/upload', {
+        method: 'POST',
+        body: formData
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setMessage(data.message + ': ' + data.filename)
+      } else {
+        setMessage(data.detail)
+      }
+    } catch (err) {
+      setMessage('Could not reach the server. Is the backend running?')
     }
   }
 
-  async function handleAsk() {
+  async function handleAsk(e) {
+    e.preventDefault()
     if (question.trim() === '') {
       return
     }
     setResult(null)
+    setError('')
     setLoading(true)
-    const response = await fetch(API + '/query?q=' + encodeURIComponent(question))
-    const data = await response.json()
-    setResult(data)
+    try {
+      const response = await fetch(API + '/query?q=' + encodeURIComponent(question))
+      if (response.ok) {
+        const data = await response.json()
+        setResult(data)
+      } else {
+        setError('Something went wrong on the server. Please try again.')
+      }
+    } catch (err) {
+      setError('Could not reach the server. Is the backend running?')
+    }
     setLoading(false)
   }
 
   return (
-    <div>
+    <div className="page">
       <h1>DocuMind</h1>
+      <p className="subtitle">Ask questions about your company documents</p>
 
-      <h2>Upload a document</h2>
-      <input type="file" accept=".pdf" onChange={(e) => setFile(e.target.files[0])} />
-      <button onClick={handleUpload}>Upload</button>
-      <p>{message}</p>
+      <div className="card">
+        <h2>1. Upload a document</h2>
+        <input type="file" accept=".pdf" onChange={(e) => setFile(e.target.files[0])} />
+        <button onClick={handleUpload}>Upload</button>
+        <p className="note">{message}</p>
+      </div>
 
-      <h2>Ask a question</h2>
-      <input
-        type="text"
-        value={question}
-        onChange={(e) => setQuestion(e.target.value)}
-        placeholder="Ask something about your documents"
-      />
-      <button onClick={handleAsk}>Ask</button>
+      <div className="card">
+        <h2>2. Ask a question</h2>
+        <form onSubmit={handleAsk}>
+          <input
+            className="question"
+            type="text"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Ask something about your documents"
+          />
+          <button type="submit">Ask</button>
+        </form>
 
-      {loading && <p>Thinking...</p>}
+        {loading && <p className="note">Thinking...</p>}
+        {error && <p className="error">{error}</p>}
 
-      {result && (
-        <div>
-          <h3>Answer</h3>
-          <p>{result.answer}</p>
-          {result.sources.length > 0 && (
-            <div>
-              <h3>Sources</h3>
-              <ul>
-                {result.sources.map((s, i) => (
-                  <li key={i}>{s.filename}, chunk {s.chunk_index}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
+        {result && (
+          <div>
+            <h3>Answer</h3>
+            <p className="answer">{result.answer}</p>
+            {result.sources.length > 0 && (
+              <div className="sources">
+                <h3>Sources</h3>
+                <ul>
+                  {result.sources.map((s, i) => (
+                    <li key={i}>{s.filename}, chunk {s.chunk_index}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
