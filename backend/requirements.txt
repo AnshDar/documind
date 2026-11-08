@@ -7,3 +7,4 @@ pytest
 pypdf
 groq
 python-dotenv
+httpx
