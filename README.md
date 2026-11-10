@@ -15,9 +15,6 @@ Working:
 - Every question and answer is saved in SQLite
 - 11 automated tests (pytest)
 
-Still to do:
-- Docker setup
-
 ## How it works
 
 PDF -> text -> chunks (500 characters, 100 overlap) -> SQLite
@@ -63,6 +60,20 @@ npm run dev
 
 Open http://localhost:5173 to use the app. The API pages are at http://127.0.0.1:8000/docs.
 The first run downloads the embedding model, so it takes a little longer.
+
+## Running with Docker
+
+The project has a Dockerfile for the backend, a Dockerfile for the frontend, and a `docker-compose.yml` that starts both. On a machine with Docker:
+
+1. Create `backend/.env` with your `GROQ_API_KEY`.
+2. From the project folder, run `docker compose up --build`.
+3. Open http://localhost:5173 for the page. The API is at http://localhost:8000.
+
+Notes:
+
+- The containers are built and started on every push by the GitHub Actions workflow, which checks that the backend and the page both respond. They have not been run on my own laptop, because Docker is not installed there.
+- The frontend container runs the Vite development server. It is meant for demos, not for production.
+- The database, search index and uploaded files live inside the backend container, so they are lost when the container is removed.
 
 ## Endpoints
 
