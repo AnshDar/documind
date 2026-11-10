@@ -80,6 +80,7 @@ Notes:
 - GET /health : checks that the server is running
 - POST /upload : upload a PDF
 - GET /search?q=your question&n=3 : returns the n closest chunks
+- GET /query?q=your question&n=3 : returns an answer from the LLM, with the sources it used
 
 ## Sample documents
 The sample_docs folder has two made-up company PDFs for testing.
@@ -100,3 +101,12 @@ python test_questions.py
 ```
 
 It asks 20 questions (17 the documents can answer, 3 they cannot) and prints PASS or FAIL for each. This one calls the real LLM.
+
+## Known limits
+
+- Only text PDFs work. Scanned PDFs need OCR, which is not included.
+- Tables in a PDF are read as plain lines of text, so a question about a table can come out less exact.
+- Documents are cut into fixed 500-character chunks, so a sentence is sometimes split. The overlap between chunks makes up for most of this.
+- The distance cut-offs (1.35 to answer, 1.1 to cite) were chosen using two small sample documents. Run `python test_questions.py` again after adding new documents.
+- Every question sends the matching passages to the Groq service, so only documents that are allowed to leave the machine should be used.
+- There are no user accounts. Anyone who can reach the app sees all uploaded documents.
