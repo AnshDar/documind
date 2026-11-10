@@ -32,3 +32,26 @@ jobs:
       - name: Run tests
         working-directory: backend
         run: python -m pytest
+    
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create a dummy .env
+        run: echo "GROQ_API_KEY=test-key" > backend/.env
+
+      - name: Build and start the containers
+        run: docker compose up -d --build
+
+      - name: Wait for the backend and the page
+        run: |
+          for i in $(seq 1 40); do
+            if curl -sf http://localhost:8000/health && curl -sf http://localhost:5173 > /dev/null; then
+              echo "both are up"
+              exit 0
+            fi
+            sleep 3
+          done
+          docker compose logs
+          exit 1

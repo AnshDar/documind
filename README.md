@@ -1,5 +1,5 @@
 # Documind
-
+![Tests](https://github.com/AnshDar/documind/actions/workflows/tests.yml/badge.svg)
 Documind is an assistant tool that answers questions regarding company documents. We upload a document, ask a question in plain English and it finds the relevant part of the document.
 
 
